@@ -276,6 +276,34 @@ If you do not want to use Docker, you can run Dashy directly on your host system
 4. Build: `yarn build`
 5. Run: `yarn start`
 
+For example, the following steps can be used for Ubuntu/Debian based distros:
+
+```bash
+# Install prerequisites
+sudo apt update
+sudo apt install -y curl git
+
+# Install Node.js (v24 LTS) from NodeSource, and enable yarn
+curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
+sudo apt install -y nodejs
+sudo corepack enable
+
+# Get the code
+git clone https://github.com/Lissy93/dashy.git
+cd dashy
+
+# Install dependencies and build
+yarn
+yarn build
+
+# Run it (serves on http://localhost:4000 by default, change with PORT env var)
+yarn start
+
+# Put all your assets (icons, styles, scripts, fonts, etc) and configs in ./user-data
+# Then, get started with editing the main config
+nano user-data/conf.yml
+```
+
 ---
 
 ## Nix / NixOS
