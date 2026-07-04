@@ -20,16 +20,9 @@ Once you've got Dashy up and running, you'll want to configure it with your own 
   - [Docker Run](/docs/deployment/docker.md#docker-run)
   - [Docker Compose](/docs/deployment/docker.md#docker-compose)
   - [Podman](/docs/deployment/docker.md#podman)
-  - [Play with Docker](/docs/deployment/docker.md#play-with-docker)
 - [Bare Metal](/docs/deployment/bare-metal.md)
   - [Build from Source](/docs/deployment/bare-metal.md#build-from-source)
   - [Pre-Built Release](/docs/deployment/bare-metal.md#pre-built-release)
-- [Cloud Services](/docs/deployment/cloud.md)
-  - [Static Hosting Providers](/docs/deployment/cloud.md#static-hosting-providers)
-  - [Container Runtimes](/docs/deployment/cloud.md#container-runtimes)
-  - [Managed Hosting](/docs/deployment/cloud.md#managed-hosting)
-  - [Hosting with any CDN](/docs/deployment/cloud.md#hosting-with-any-cdn)
-  - [Other VPS](/docs/deployment/cloud.md#other-vps)
 - [Self-Hosted Operating Systems](/docs/deployment/self-hosted-os.md)
   - [TrueNAS SCALE](/docs/deployment/self-hosted-os.md#truenas-scale)
   - [Proxmox VE](/docs/deployment/self-hosted-os.md#proxmox-ve)
@@ -47,7 +40,26 @@ Once you've got Dashy up and running, you'll want to configure it with your own 
   - [Umbrel](/docs/deployment/self-hosted-platforms.md#umbrel)
   - [EasyPanel](/docs/deployment/self-hosted-platforms.md#easypanel)
   - [Saltbox](/docs/deployment/self-hosted-platforms.md#saltbox)
-
+- [Cloud Services](/docs/deployment/cloud.md)
+  - [Static Hosting Providers](/docs/deployment/cloud.md#static-hosting-providers)
+    - [Netlify](/docs/deployment/cloud.md#netlify)
+    - [Vercel](/docs/deployment/cloud.md#vercel)
+    - [EdgeOne Pages](/docs/deployment/cloud.md#edgeone-pages)
+    - [Cloudflare Pages](/docs/deployment/cloud.md#cloudflare-pages)
+    - [Firebase Hosting](/docs/deployment/cloud.md#firebase-hosting)
+    - [Azure Static Web Apps](/docs/deployment/cloud.md#azure-static-web-apps)
+  - [Container Runtimes](/docs/deployment/cloud.md#container-runtimes)
+    - [Render](/docs/deployment/cloud.md#render)
+    - [Railway](/docs/deployment/cloud.md#railway)
+    - [Fly.io](/docs/deployment/cloud.md#flyio)
+    - [Koyeb](/docs/deployment/cloud.md#koyeb)
+    - [Northflank](/docs/deployment/cloud.md#northflank)
+    - [DigitalOcean App Platform](/docs/deployment/cloud.md#digitalocean-app-platform)
+    - [Azure Container Apps](/docs/deployment/cloud.md#azure-container-apps)
+    - [Google Cloud Run](/docs/deployment/cloud.md#google-cloud-run)
+  - [Managed Hosting](/docs/deployment/cloud.md#managed-hosting)
+  - [Hosting with any CDN](/docs/deployment/cloud.md#hosting-with-any-cdn)
+  - [Other VPS](/docs/deployment/cloud.md#other-vps)
 
 ---
 
@@ -58,7 +70,7 @@ The pre-built Docker image runs on `amd64`, `arm64` and `armv7` (`armv6` is not 
 
 ### System Resources
 - CPU: any single core, x86-64 or ARM
-- RAM: Node server idles around ~80–120 MB; 256 MB is comfortable, works in less
+- RAM: Node server idles around ~80-120 MB; 256 MB is comfortable, works in less
 - Disk: ~250 MB for the image + whatever your config/icons need
 - Runs fine on a Pi 3 and up
 
