@@ -216,6 +216,12 @@ function requireAdmin(req, res, next) {
 /* A middleware function for Connect, that filters requests based on method type */
 const method = (m, mw) => (req, res, next) => (req.method === m ? mw(req, res, next) : next());
 
+/* Kill switch for endpoints that make outbound requests (DISABLE_PROXY_ENDPOINTS=true) */
+const proxyEndpointsGate = (req, res, next) => {
+  if (process.env.DISABLE_PROXY_ENDPOINTS !== 'true') return next();
+  return res.status(403).json({ error: 'This feature has been disabled by your administrator' });
+};
+
 const app = express()
   .get(ENDPOINTS.health, (req, res) => {
     res.set('Cache-Control', 'no-store').status(200).json({
@@ -229,7 +235,7 @@ const app = express()
   // Load middlewares for parsing JSON, and supporting HTML5 history routing
   .use(express.json({ limit: '1mb' }))
   // GET endpoint to run status of a given URL with GET request
-  .use(ENDPOINTS.statusCheck, protectConfig, requireAuth, method('GET', (req, res) => {
+  .use(ENDPOINTS.statusCheck, proxyEndpointsGate, protectConfig, requireAuth, method('GET', (req, res) => {
     try {
       statusCheck(req.url, (results) => {
         if (!res.headersSent) {
@@ -245,7 +251,7 @@ const app = express()
     }
   }))
   // GET endpoint to run ping of a given URL with GET request
-  .use(ENDPOINTS.pingCheck, protectConfig, requireAuth, method('GET', (req, res) => {
+  .use(ENDPOINTS.pingCheck, proxyEndpointsGate, protectConfig, requireAuth, method('GET', (req, res) => {
     try {
       pingCheck(req.url, (results) => {
         if (!res.headersSent) {
@@ -285,7 +291,7 @@ const app = express()
     }
   }))
   // GET for accessing non-CORS API services
-  .use(ENDPOINTS.corsProxy, protectConfig, requireAuth, (req, res) => {
+  .use(ENDPOINTS.corsProxy, proxyEndpointsGate, protectConfig, requireAuth, (req, res) => {
     try {
       corsProxy(req, res);
     } catch (e) {
