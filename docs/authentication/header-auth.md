@@ -8,6 +8,7 @@ Use this when you already run something like [Authelia](https://www.authelia.com
 
 - [Configure Dashy](#configure-dashy)
 - [Configure your proxy](#configure-your-proxy)
+- [Logging out](#logging-out)
 - [Troubleshooting](#troubleshooting)
 - [Security notes](#security-notes)
 - [How it works](#how-it-works)
@@ -49,6 +50,20 @@ Two things the proxy has to do:
 
 The whitelist is the security boundary, so Dashy must only be reachable through the proxy. If someone can hit Dashy directly and their IP happens to be whitelisted, they can forge the header. See [Security notes](#security-notes).
 
+## Logging out
+
+Dashy's logout button only clears Dashy's own session. Your session at the proxy stays alive, so the next page load signs you straight back in. To end both, point `logoutRedirectUrl` at your proxy's sign-out endpoint:
+
+```yaml
+appConfig:
+  auth:
+    logoutRedirectUrl: https://dashy.example.com/oauth2/sign_out
+```
+
+Logging out then sends the browser to that URL, where the proxy can destroy its session.
+
+The specific endpoint depends on your proxy, but for oauth2-proxy it's usually `/oauth2/sign_out` with an `rd` query param to chain your identity provider's logout, e.g. `/oauth2/sign_out?rd=https://sso.example.com/logout` (the `rd` domain must be in oauth2-proxy's `whitelist_domains`).
+
 ## Troubleshooting
 
 #### 401 "Unauthorized - not from trusted proxy"
@@ -64,7 +79,7 @@ The proxy sent a username with no matching entry in `auth.users`. Add a user who
 That user's `type` isn't `admin`. Saving is admin-only, so set `type: admin` on their entry.
 
 #### Logging out just logs me back in
-Expected. Logout clears Dashy's cookie, but you're still signed in at the proxy, so the next page load re-authenticates from the header. To fully sign out, log out at the proxy.
+Expected with the default config. Logout clears Dashy's cookie, but you're still signed in at the proxy, so the next page load re-authenticates from the header. Set `logoutRedirectUrl` to your proxy's sign-out endpoint to end both sessions — see [Logging out](#logging-out).
 
 ## Security notes
 

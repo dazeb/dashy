@@ -183,6 +183,12 @@ export const logout = () => {
   localStorage.removeItem(localStorageKeys.USERNAME);
 };
 
+/* Returns the URL to redirect to after logout if set */
+export const getLogoutRedirectUrl = () => {
+  const auth = getAppConfig().auth || {};
+  return auth.logoutRedirectUrl || null;
+};
+
 /**
  * If correctly logged in as a valid, authenticated user,
  * then returns the user object for the current user
