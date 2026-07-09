@@ -42,6 +42,10 @@ describe('CustomApiHelpers - formatValue', () => {
     expect(formatValue('abc', { format: 'number', locale: 'en-US' })).toBe('abc');
   });
 
+  it('float: is an alias of number', () => {
+    expect(formatValue(1234.5, { format: 'float', locale: 'en-US' })).toBe('1,234.5');
+  });
+
   it('percent: treats the value as an already-computed percentage', () => {
     expect(formatValue(42, { format: 'percent', locale: 'en-US' })).toBe('42%');
   });
@@ -82,6 +86,31 @@ describe('CustomApiHelpers - formatValue', () => {
 
   it('bitrate: auto-selects a readable unit', () => {
     expect(formatValue(2500000, { format: 'bitrate' })).toBe('2.5 Mbps');
+  });
+
+  it('duration: shows seconds as a compact time', () => {
+    expect(formatValue(93784, { format: 'duration' })).toBe('1d 2h');
+    expect(formatValue(330, { format: 'duration' })).toBe('5m 30s');
+    expect(formatValue(0, { format: 'duration' })).toBe('0s');
+  });
+
+  it('duration: passes through non-numeric input', () => {
+    expect(formatValue('abc', { format: 'duration' })).toBe('abc');
+  });
+
+  it('remap: swaps a matching value', () => {
+    const remap = [{ value: 0, to: 'Down' }, { value: 1, to: 'Up' }];
+    expect(formatValue(1, { format: 'text', remap })).toBe('Up');
+    expect(formatValue('1', { format: 'text', remap })).toBe('Up');
+  });
+
+  it('remap: `any` acts as a catch-all', () => {
+    const remap = [{ value: 0, to: 'Down' }, { any: true, to: 'Unknown' }];
+    expect(formatValue(7, { format: 'text', remap })).toBe('Unknown');
+  });
+
+  it('remap: leaves unmatched values alone', () => {
+    expect(formatValue(7, { format: 'text', remap: [{ value: 0, to: 'Down' }] })).toBe('7');
   });
 
   it('scale: multiplies by a numeric factor before formatting', () => {

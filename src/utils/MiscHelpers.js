@@ -114,6 +114,18 @@ export const convertBitrate = (bits, decimals = 2) => (
   convertToUnit(bits, 1000, ['bps', 'Kbps', 'Mbps', 'Gbps', 'Tbps', 'Pbps'], decimals)
 );
 
+/* Given a number of seconds returns more human duration, like '6d 9h' or '4m 20s' */
+export const convertDuration = (seconds) => {
+  let rest = Math.round(Math.abs(seconds));
+  const parts = [];
+  [['d', 86400], ['h', 3600], ['m', 60], ['s', 1]].forEach(([unit, size]) => {
+    const amount = Math.floor(rest / size);
+    rest -= amount * size;
+    if (amount) parts.push(`${amount}${unit}`);
+  });
+  return parts.slice(0, 2).join(' ') || '0s';
+};
+
 /* Round a number to thousands, millions, billions or trillions and suffix
  * with K, M, B or T respectively, e.g. 4_294_967_295 => 4.3B */
 export const formatNumber = (number, decimals = 1) => {

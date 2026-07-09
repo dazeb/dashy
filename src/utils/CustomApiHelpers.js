@@ -1,5 +1,5 @@
 /* Field resolution and value formatting for the CustomApi widget */
-import { convertBytes, convertBitrate } from '@/utils/MiscHelpers';
+import { convertBytes, convertBitrate, convertDuration } from '@/utils/MiscHelpers';
 
 /* Get a nested value from an object by dot-path, e.g. 'a.b.0.c'. Empty path returns the root */
 export const resolveField = (obj, path) => {
@@ -50,6 +50,13 @@ const applyScale = (raw, scale) => {
   return (Number.isNaN(n) || !Number.isFinite(factor)) ? raw : n * factor;
 };
 
+/* Swap a value for a matching remap entry's `to`, e.g. 0 → 'Down'. `any: true` matches all */
+const applyRemap = (raw, remaps) => {
+  if (!Array.isArray(remaps)) return raw;
+  const match = remaps.find((r) => r && r.to !== undefined && (r.any || String(r.value) === String(raw)));
+  return match ? match.to : raw;
+};
+
 /* Format a raw value per a mapping's `format`. `root` is the full response, used by `size` */
 const applyFormat = (raw, mapping, root) => {
   const format = mapping.format || 'text';
@@ -64,10 +71,11 @@ const applyFormat = (raw, mapping, root) => {
   }
 
   if (raw == null) return '';
-  const value = applyScale(raw, mapping.scale);
+  const value = applyScale(applyRemap(raw, mapping.remap), mapping.scale);
 
   switch (format) {
-    case 'number': {
+    case 'number':
+    case 'float': {
       const n = Number(value);
       return Number.isNaN(n) ? String(value) : new Intl.NumberFormat(locale).format(n);
     }
@@ -81,6 +89,10 @@ const applyFormat = (raw, mapping, root) => {
       const n = Number(value);
       if (Number.isNaN(n)) return String(value);
       return format === 'bytes' ? convertBytes(n) : convertBitrate(n);
+    }
+    case 'duration': {
+      const n = Number(value);
+      return Number.isNaN(n) ? String(value) : convertDuration(n);
     }
     case 'date': {
       const date = new Date(value);
