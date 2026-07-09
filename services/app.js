@@ -268,6 +268,9 @@ const app = express()
   }))
   // POST Endpoint used to save config, by writing config file to disk
   .use(ENDPOINTS.save, protectConfig, requireAdmin, method('POST', (req, res) => {
+    if (config?.appConfig?.preventWriteToDisk) {
+      return res.status(403).json({ error: 'Editing config has been disabled by your administrator' });
+    }
     let responded = false;
     const respond = (jsonBody) => {
       if (responded || res.headersSent) return;
