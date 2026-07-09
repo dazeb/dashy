@@ -97,14 +97,22 @@ export const capitalize = (str) => {
   return words.replace(/\w\S*/g, (w) => (w.replace(/^\w/, (c) => c.toUpperCase())));
 };
 
-/* Given a mem size in bytes, will return it in appropriate unit */
-export const convertBytes = (bytes, decimals = 2) => {
-  if (bytes === 0) return '0 Bytes';
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / (k ** i)).toFixed(decimals))} ${sizes[i]}`;
+/* Scales a value into the largest fitting unit from `sizes`, at base `k` */
+const convertToUnit = (value, k, sizes, decimals) => {
+  const magnitude = Math.floor(Math.log(Math.abs(value)) / Math.log(k));
+  const i = Math.min(Math.max(magnitude, 0), sizes.length - 1);
+  return `${parseFloat((value / (k ** i)).toFixed(decimals))} ${sizes[i]}`;
 };
+
+/* Given a mem size in bytes, will return it in appropriate unit */
+export const convertBytes = (bytes, decimals = 2) => (
+  convertToUnit(bytes, 1024, ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'], decimals)
+);
+
+/* Given a rate in bits per second, will return it in appropriate unit */
+export const convertBitrate = (bits, decimals = 2) => (
+  convertToUnit(bits, 1000, ['bps', 'Kbps', 'Mbps', 'Gbps', 'Tbps', 'Pbps'], decimals)
+);
 
 /* Round a number to thousands, millions, billions or trillions and suffix
  * with K, M, B or T respectively, e.g. 4_294_967_295 => 4.3B */
