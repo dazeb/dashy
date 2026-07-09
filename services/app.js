@@ -275,9 +275,14 @@ const app = express()
     const respond = (jsonBody) => {
       if (responded || res.headersSent) return;
       responded = true;
-      try { // Only update in-memory config when disk write succeeds
-        if (JSON.parse(jsonBody).success === true) config = req.body.config;
-      } catch (e) { /* unparseable body, config is unchanged */ }
+      try { // Only update in-memory config when a root conf.yml write succeeds
+        const target = (typeof req.body.filename === 'string' && req.body.filename)
+          ? path.basename(req.body.filename) : 'conf.yml';
+        if (JSON.parse(jsonBody).success === true && target === 'conf.yml') {
+          const parsed = yaml.load(req.body.config);
+          if (parsed && typeof parsed === 'object') config = parsed;
+        }
+      } catch (e) { /* unparseable body or YAML, config is unchanged */ }
       try { res.end(jsonBody); } catch (e) { /* response stream gone */ }
     };
     saveConfig(req.body, respond).catch((e) => {
