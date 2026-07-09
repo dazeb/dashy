@@ -75,12 +75,9 @@ describe('CustomApiHelpers - formatValue', () => {
     expect(formatValue('abc', { format: 'bytes' })).toBe('abc');
   });
 
-  it('bytes: handles zero and values below one unit', () => {
+  it('bytes: handles zero, fractional and negative values', () => {
     expect(formatValue(0, { format: 'bytes' })).toBe('0 Bytes');
     expect(formatValue(0.5, { format: 'bytes' })).toBe('0.5 Bytes');
-  });
-
-  it('bytes: keeps the sign of negative values', () => {
     expect(formatValue(-1073741824, { format: 'bytes' })).toBe('-1 GB');
   });
 
