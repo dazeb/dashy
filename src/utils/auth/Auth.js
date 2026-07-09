@@ -2,6 +2,7 @@ import sha256 from 'crypto-js/sha256';
 import ConfigAccumulator from '@/utils/config/ConfigAccumalator';
 import ErrorHandler from '@/utils/logging/ErrorHandler';
 import { cookieKeys, localStorageKeys, userStateEnum } from '@/utils/config/defaults';
+import getApiAuthHeader from '@/utils/auth/getApiAuthHeader';
 import { isKeycloakEnabled } from '@/utils/auth/KeycloakAuth';
 import { isOidcEnabled } from '@/utils/auth/OidcAuth';
 
@@ -67,6 +68,7 @@ export const getCookieToken = () => {
 };
 
 export const makeBasicAuthHeaders = () => {
+  if (getApiAuthHeader()) return {};
   const token = getCookieToken();
   const bearerAuth = (token && token.length > 5) ? `Bearer ${token}` : null;
 
