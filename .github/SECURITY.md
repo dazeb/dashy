@@ -30,6 +30,10 @@ The latest minor and patch versions are supported. Previous major versions (e.g.
 Dashy's security posture and features are outlined in our [security docs](https://dashy.to/docs/security).
 A lot of security comes down to how and where you deploy Dashy, so we've also documented some self-hosting best practices in the [management guide](https://dashy.to/docs/management/).
 
+## Safe harbor
+If you research and report in good faith, following this policy, I won't pursue legal action against you.
+Just keep your testing to your own instance, don't access or disrupt anyone else's data, and give us time to fix things before going public.
+
 ## What not to report here
 We get a LOT of false positives security reports, usually from AI scans. Be sure to verify your findings.
 
