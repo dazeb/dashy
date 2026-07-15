@@ -72,9 +72,6 @@ export default {
     };
   },
   computed: {
-    hideProfileCard() {
-      return !!this.options.hideProfileCard;
-    },
     username() {
       return this.options.username;
     },
@@ -94,17 +91,12 @@ export default {
   methods: {
     /* Validate options, then dispatch a request for the profile and each repo */
     fetchData() {
-      if (!this.hideProfileCard && !this.username) {
-        this.error('You must specify a GitHub username');
-        this.finishLoading();
-        return;
-      }
-      if (this.hideProfileCard && !this.repos.length) {
+      if (!this.username && !this.repos.length) {
         this.error('Nothing to display, set a username or add repos');
         this.finishLoading();
         return;
       }
-      if (!this.hideProfileCard) this.fetchProfile();
+      if (this.username) this.fetchProfile();
       if (this.repos.length) this.fetchRepos();
     },
     /* Fetch the users profile for the top card */
