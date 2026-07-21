@@ -2,7 +2,7 @@
   <div :class="`item-wrapper wrap-size-${size} span-${makeColumnCount}`" >
     <a @click="itemClicked"
       @long-press="openContextMenu"
-      @contextmenu.prevent
+      @contextmenu="preventNativeContextMenu"
       @mouseup.right="openContextMenu"
       v-longPress="true"
       :href="effectiveUrl"
