@@ -16,7 +16,7 @@
     >
       <!-- Item Text -->
       <div :class="`tile-title  ${!itemIcon? 'bounce no-icon': ''}`" :id="`tile-${item.id}`" >
-        <span class="text">{{ item.title }}</span>
+        <span ref="titleText" class="text">{{ item.title }}</span>
         <p class="description">{{ item.description }}</p>
       </div>
       <!-- Item Icon -->
@@ -140,6 +140,7 @@ export default {
   data() {
     return {
       editMenuOpen: false,
+      titleTruncated: false,
     };
   },
   methods: {
@@ -163,20 +164,28 @@ export default {
     },
     /* Returns configuration object for the tooltip */
     getTooltipOptions() {
-      if (!this.item.description && !this.item.provider) return {}; // If no description, then skip
-      const description = this.item.description || '';
-      const providerText = this.item.provider ? `<b>Provider</b>: ${this.item.provider}` : '';
-      const lb1 = description && providerText ? '<br>' : '';
-      const hotkeyText = this.item.hotkey ? `<br>Press '${this.item.hotkey}' to launch` : '';
-      const tooltipText = providerText + lb1 + description + hotkeyText;
+      const {
+        title, description, provider, hotkey,
+      } = this.item;
+      if (!description && !provider && !this.titleTruncated) return {}; // Nothing to show
+      const parts = [];
+      if (this.titleTruncated) parts.push(`<b>${title}</b>`);
+      if (provider) parts.push(`<b>Provider</b>: ${provider}`);
+      if (description) parts.push(description);
+      if (hotkey) parts.push(`Press '${hotkey}' to launch`);
       const editText = this.$t('interactive-editor.edit-section.edit-tooltip');
       return {
-        content: (this.isEditMode ? editText : tooltipText),
+        content: (this.isEditMode ? editText : parts.join('<br>')),
         html: true,
         placement: this.statusResponse || this.pingResponse ? 'left' : 'auto',
         delay: { show: 600, hide: 200 },
         popperClass: `item-description-tooltip tooltip-is-${this.size}`,
       };
+    },
+    /* Show the full title in the tooltip, if it's truncated in the tile */
+    checkTitleTruncation() {
+      const title = this.$refs.titleText;
+      this.titleTruncated = !!title && title.scrollWidth > title.clientWidth;
     },
     openItemSettings() {
       this.editMenuOpen = true;
@@ -202,6 +211,12 @@ export default {
     },
   },
   mounted() {
+    // Watch for size changes, to know when title no longer fits
+    if (typeof ResizeObserver !== 'undefined') {
+      this.titleObserver = new ResizeObserver(this.checkTitleTruncation);
+      this.titleObserver.observe(this.$refs.titleText);
+    }
+    if (document.fonts) document.fonts.ready.then(this.checkTitleTruncation);
     // If ping checking is enabled, then check ping status
     if (this.isPingCheckEnabled) {
       this.checkPingStatus();
@@ -223,6 +238,7 @@ export default {
     // Stop periodic ping-check and status-check when item is destroyed (e.g. navigating in multi-page setup)
     if (this.pingIntervalId) clearInterval(this.pingIntervalId);
     if (this.intervalId) clearInterval(this.intervalId);
+    if (this.titleObserver) this.titleObserver.disconnect();
   },
 };
 </script>
