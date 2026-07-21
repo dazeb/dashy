@@ -4,6 +4,10 @@
       @long-press="openContextMenu"
       @contextmenu="preventNativeContextMenu"
       @mouseup.right="openContextMenu"
+      @mouseenter="startTitleScroll"
+      @mouseleave="endTitleScroll"
+      @focus="startTitleScroll"
+      @blur="endTitleScroll"
       v-longPress="true"
       :href="effectiveUrl"
       :target="anchorTarget"
@@ -15,7 +19,7 @@
       :style="customStyle"
     >
       <!-- Item Text -->
-      <div :class="`tile-title  ${!itemIcon? 'bounce no-icon': ''}`" :id="`tile-${item.id}`" >
+      <div :id="`tile-${item.id}`" :class="`tile-title ${!itemIcon? 'bounce no-icon': ''}`">
         <span ref="titleText" class="text">{{ item.title }}</span>
         <p class="description">{{ item.description }}</p>
       </div>
@@ -143,6 +147,12 @@ export default {
       titleTruncated: false,
     };
   },
+  watch: {
+    /* Watch for when item gets rename, to re-measure it's length check for truncation */
+    'item.title': function titleChanged() {
+      this.$nextTick(this.checkTitleTruncation);
+    },
+  },
   methods: {
     shortUrl(value) {
       if (!value || typeof value !== 'string') {
@@ -182,10 +192,53 @@ export default {
         popperClass: `item-description-tooltip tooltip-is-${this.size}`,
       };
     },
-    /* Show the full title in the tooltip, if it's truncated in the tile */
+    /* Measure whether the title is truncated in its tile */
     checkTitleTruncation() {
       const title = this.$refs.titleText;
       this.titleTruncated = !!title && title.scrollWidth > title.clientWidth;
+    },
+    /* Slowly scroll truncated titles into view, while hovered or focused */
+    startTitleScroll() {
+      const TITLE_SCROLL_SPEED = 90; // Pixels per second for item scroll
+      clearTimeout(this.titleScrollTimer);
+      cancelAnimationFrame(this.titleScrollRaf);
+      if (!this.titleTruncated || !window.matchMedia('(hover: hover)').matches) return;
+      this.titleScrollTimer = setTimeout(() => {
+        const title = this.$refs.titleText;
+        if (!title) return;
+        const target = title.scrollWidth - title.clientWidth;
+        if (target <= title.scrollLeft) return;
+        if (this.reducedMotion()) {
+          title.scrollLeft = target;
+          return;
+        }
+        let start; let from; let duration;
+        const step = (now) => {
+          if (!start) {
+            start = now;
+            from = title.scrollLeft;
+            duration = ((target - from) / TITLE_SCROLL_SPEED) * 1000;
+          }
+          const progress = Math.min((now - start) / duration, 1);
+          title.scrollLeft = from + (target - from) * progress;
+          if (progress < 1) this.titleScrollRaf = requestAnimationFrame(step);
+        };
+        this.titleScrollRaf = requestAnimationFrame(step);
+      }, 300);
+    },
+    /* Scroll the title back, unless the item is still hovered or focused */
+    endTitleScroll(event) {
+      const link = event?.currentTarget;
+      if (link && (link.matches(':hover') || link === document.activeElement)) return;
+      clearTimeout(this.titleScrollTimer);
+      cancelAnimationFrame(this.titleScrollRaf);
+      const title = this.$refs.titleText;
+      if (title && title.scrollLeft > 0) {
+        title.scrollTo({ left: 0, behavior: this.reducedMotion() ? 'auto' : 'smooth' });
+      }
+    },
+    reducedMotion() {
+      return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     },
     openItemSettings() {
       this.editMenuOpen = true;
@@ -239,6 +292,8 @@ export default {
     if (this.pingIntervalId) clearInterval(this.pingIntervalId);
     if (this.intervalId) clearInterval(this.intervalId);
     if (this.titleObserver) this.titleObserver.disconnect();
+    clearTimeout(this.titleScrollTimer);
+    cancelAnimationFrame(this.titleScrollRaf);
   },
 };
 </script>
@@ -346,14 +401,9 @@ export default {
     display: block;
   }
 
-  /* Trigger text-marquee for text that doesn't fit */
-  .tile-title.is-overflowing{
-    .overflow-dots {
-      opacity: 0;
-    }
-    span.text {
-      transform: translateX(calc(100px - 100%));
-    }
+  /* Hide the ellipsis while a truncated title is scrolled into view */
+  .tile-title span.text {
+    text-overflow: clip;
   }
 
   /* Apply transformation of icons on hover */
