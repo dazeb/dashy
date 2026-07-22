@@ -105,12 +105,7 @@ export default {
     makeMatch(match) {
       const score = match.score || {};
       const games = Array.isArray(score.games) ? score.games : [];
-      // Sets are only over when both players have a game count recorded for them
-      const setCount = Math.max(
-        (games[0] || []).length,
-        (games[1] || []).length,
-      );
-      const sets = Array.isArray(score.sets) ? score.sets : [];
+      const setCount = Math.max((games[0] || []).length, (games[1] || []).length);
       const isLive = match.status === 'live';
       return {
         id: match.id,
@@ -122,37 +117,28 @@ export default {
         isTiebreak: !!score.is_tiebreak,
         // Only a live match has a set in progress to highlight
         currentSet: isLive ? setCount - 1 : -1,
-        players: [
-          this.makePlayer(match.players, 'p1', 0, score, setCount, sets, match.status),
-          this.makePlayer(match.players, 'p2', 1, score, setCount, sets, match.status),
-        ],
+        players: [0, 1].map((index) => this.makePlayer(match, index, setCount)),
       };
     },
     /* Flatten one side of a match. `index` is 0 for p1, 1 for p2 */
-    makePlayer(players, key, index, score, setCount, sets, status) {
-      const player = (players || {})[key] || {};
-      const games = ((score.games || [])[index] || []);
-      const points = score.points || [];
-      const opponentSets = sets[index === 0 ? 1 : 0];
+    makePlayer(match, index, setCount) {
+      const score = match.score || {};
+      const player = (match.players || {})[`p${index + 1}`] || {};
+      const games = (score.games || [])[index] || [];
+      const sets = Array.isArray(score.sets) ? score.sets : [];
       return {
-        id: player.id || key,
+        id: player.id || `p${index + 1}`,
         name: player.name || 'Unknown',
         ranking: player.ranking,
         // The API numbers the server 1 or 2, matching p1 / p2.
         // It keeps the last server on a finished match, so only show it while live
-        isServing: status === 'live' && score.server === index + 1,
+        isServing: match.status === 'live' && score.server === index + 1,
         // Pad short rows so both players' set columns stay aligned
-        games: this.padGames(games, setCount),
-        point: points[index] !== undefined ? points[index] : '',
+        games: Array.from({ length: setCount }, (_, i) => games[i] ?? ''),
+        point: (score.points || [])[index] ?? '',
         // Only a finished match has a winner to highlight
-        isWinner: status === 'completed' && sets.length > 0 && sets[index] > opponentSets,
+        isWinner: match.status === 'completed' && sets.length > 0 && sets[index] > sets[1 - index],
       };
-    },
-    /* Right-pad a player's per-set game counts so both rows are the same length */
-    padGames(games, setCount) {
-      const padded = games.slice(0, setCount);
-      while (padded.length < setCount) padded.push('');
-      return padded;
     },
   },
   created() {
