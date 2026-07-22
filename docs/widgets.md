@@ -865,6 +865,8 @@ Show recent scores and upcoming matches from your favorite sports team. Data is 
 
 Live tennis scores from the ATP and WTA tours, updating in place. Each match shows both players with their per-set game scores, the current game points, and a marker against whoever is serving. Set the `status` option to show upcoming or recently finished matches instead. Data is from [LiveTennisAPI](https://livetennisapi.com/).
 
+<p align="center"><img width="400" src="https://pixelflare.cc/alicia/dashy/tennis-scores" /></p>
+
 #### Options
 
 **Field** | **Type** | **Required** | **Description**
