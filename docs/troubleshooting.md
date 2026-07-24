@@ -105,6 +105,8 @@ There should be an error message, explaining the reason the config save failed. 
 
 The container can't write to your `conf.yml` or its directory. Almost always an ownership mismatch: the host directory belongs to a different uid than the one Dashy runs as inside the container. Less commonly a read-only mount or an over-strict file mode.
 
+The `COPY --chown=node:node` in the Dockerfile only sets ownership *inside the image*. When you bind-mount `user-data`, your host directory takes over that path entirely, so its ownership is what counts - not the image's.
+
 Dashy runs as UID=1000 (default non-root node user). You can see this by running `docker exec -it dashy id`. Then, check who owns the user-data directory, with: `docker exec -it dashy ls -la /app/user-data` - if it's not `1000` then that's the issue. And the solution is just to run `sudo chown -R 1000:1000 /path/to/your/user-data` to set the right owner.
 
 Fixes:
@@ -625,13 +627,15 @@ You can [check your rate limit status](https://www.docker.com/blog/checking-your
 
 If `docker pull` returns `manifest unknown` or `manifest for lissy93/dashy:arm32v7 not found`, the cause is a stale architecture-specific tag in your compose file or run command. Tags like `:arm32v7`, `:arm64v8`, and `:multi-arch` are no longer published.
 
-The `:latest` tag is now multi-arch and works on amd64, arm64, and arm/v7 (Raspberry Pi 2 and up) without you having to pick a variant. Just use:
+The `:latest` tag is multi-arch and works on amd64 and arm64 without you having to pick a variant. Just use:
 
 ```yaml
 image: lissy93/dashy:latest
 ```
 
 Docker fetches the right architecture for your host automatically. To pin a version, use a semver tag, e.g. `lissy93/dashy:3.2.14`.
+
+32-bit `armv7` (Raspberry Pi 2, or a Pi running a 32-bit OS) is no longer supported. If you need it, pin the last armv7 image with `image: lissy93/dashy:4.4.10`.
 
 ### Healthcheck Failing in Docker
 
