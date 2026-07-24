@@ -62,6 +62,7 @@
   - [Mount Type Mismatch](#mount-type-mismatch)
   - [DockerHub toomanyrequests](#dockerhub-toomanyrequests)
   - [Old image tags fail to pull](#old-image-tags-fail-to-pull)
+  - [no matching manifest for linux/arm/v7 (32-bit ARM)](#no-matching-manifest-for-linuxarmv7)
   - [Healthcheck Failing in Docker](#healthcheck-failing-in-docker)
   - [Docker Login Fails on Ubuntu](#docker-login-fails-on-ubuntu)
 - [Styles and Assets not Updating](#styles-and-assets-not-updating)
@@ -635,7 +636,21 @@ image: lissy93/dashy:latest
 
 Docker fetches the right architecture for your host automatically. To pin a version, use a semver tag, e.g. `lissy93/dashy:3.2.14`.
 
-32-bit `armv7` (Raspberry Pi 2, or a Pi running a 32-bit OS) is no longer supported. If you need it, pin the last armv7 image with `image: lissy93/dashy:4.4.10`.
+### `no matching manifest for linux/arm/v7`
+
+Dashy's Docker image is built for `amd64` and `arm64` only (`4.4.10` was the last release to include a 32-bit `armv7` build). On a 32-bit ARM host (Raspberry Pi 2, or a Pi 3/4 running a 32-bit OS), `docker pull`, `docker run` or `docker compose up` fails with:
+
+```
+no matching manifest for linux/arm/v7 in the manifest list entries
+```
+
+(Pi 1 and Pi Zero report `linux/arm/v6`.) 32-bit ARM was dropped because the build toolchain (Rolldown) no longer ships a 32-bit ARM binary, and Node 24 dropped 32-bit ARM too. To fix it:
+
+- **Recommended:** reinstall your host OS as 64-bit (`arm64`). The Raspberry Pi 3 and newer all support it, and Dashy's `arm64` image is then selected automatically.
+- **Stay on 32-bit:** pin the last image that shipped `armv7`:
+  ```yaml
+  image: lissy93/dashy:4.4.10
+  ```
 
 ### Healthcheck Failing in Docker
 
